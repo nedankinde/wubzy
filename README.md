@@ -1,4 +1,4 @@
 ﻿
 ### Blazor (C#) Powered Paint App
 
-![Screenshot](https://imgur.com/a/mcZl65r)
+![Screenshot](https://i.ibb.co/qJL6Q9D/SCREENSHOT.jpg)
