@@ -1,0 +1,76 @@
+﻿@using wubzy.Services
+@using wubzy.Shared
+@inject IJSRuntime JS
+@inject DrawingStateService DrawingStateService
+
+<div class="container">
+    <div class="text-secondary py-2">Canvas</div>
+    <div class="shadow-sm bg-white rounded">
+        <canvas id="canvas" class="w-100 h-100" style="aspect-ratio: 16/9; touch-action: none;"
+                @onpointerdown="(e) => StartDrawing(e)"
+                @onpointerup="(e) => StopDrawing(e)"
+                @onpointermove="(e) => DrawOnMove(e)"
+                @onpointerleave="(e) => StopDrawing(e)">
+        </canvas>
+        <style>
+            #canvas {
+                cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23000000" stroke="%23000000" stroke-width="0.25" d="m16.24 12 3.18-3.18a1.5 1.5 0 0 0 0-2.12L17.3 4.58a1.5 1.5 0 0 0-2.12 0L12 7.76 8.82 4.58a1.5 1.5 0 0 0-2.12 0L4.58 6.7a1.5 1.5 0 0 0 0 2.12L7.76 12l-3.18 3.18a1.5 1.5 0 0 0 0 2.12l2.12 2.12a1.5 1.5 0 0 0 2.12 0L12 16.24l3.18 3.18a1.5 1.5 0 0 0 2.12 0l2.12-2.12a1.5 1.5 0 0 0 0-2.12L16.24 12Z"></path></svg>') 16 16, auto;
+            }
+        </style>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string ColorPicker { get; set; }
+
+    private bool _isDrawing = false;
+
+    private void StartDrawing(PointerEventArgs e)
+    {
+        _isDrawing = true;
+
+        DrawingStateService.StartNewLine(ColorPicker, 2);
+        DrawingStateService.AddPoint(e.OffsetX, e.OffsetY);
+    }
+
+    // Stop drawing when pointer is released
+    private void StopDrawing(PointerEventArgs e)
+    {
+        _isDrawing = false;
+        DrawingStateService.SaveState();
+    }
+
+    // Draw on move (while pointer is moving)
+    private void DrawOnMove(PointerEventArgs e)
+    {
+        if (_isDrawing)
+        {
+            DrawingStateService.AddPoint(e.OffsetX, e.OffsetY);
+        }
+    }
+    private DotNetObjectReference<Paint> _dotNetObjectReference;
+    
+    private async Task InitializeCanvasAsync()
+    {
+        _dotNetObjectReference = DotNetObjectReference.Create(this);
+
+        await JS.InvokeVoidAsync("canvasInterop.initializeCanvas", "canvas");
+        await JS.InvokeVoidAsync("canvasInterop.animateCanvas", "canvas", _dotNetObjectReference);
+    }
+    
+    [JSInvokable]
+    public void DrawAllLinesAsync (string canvasId)
+    {
+        JS.InvokeVoidAsync("canvasInterop.clearCanvas", "canvas");
+        DrawingStateService.DrawAllLinesAsync(canvasId, JS);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeCanvasAsync();
+        }
+    }
+}

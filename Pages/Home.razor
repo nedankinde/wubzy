@@ -1,0 +1,19 @@
+﻿@page "/"
+@using wubzy.Components
+
+
+<PageTitle>Home</PageTitle>
+
+<div class="d-flex flex-column gap-3">
+        <Paint ColorPicker="@SelectedColor"/>
+        <Dock ColorPicker="UpdateColor"/>
+</div>
+
+@code {
+        private string SelectedColor = "#ff0000";
+
+        private void UpdateColor(string color)
+        {
+                SelectedColor = color;
+        }
+}
