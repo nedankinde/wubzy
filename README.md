@@ -1,2 +1,2 @@
 ﻿### Blazor (C#) Powered Paint App
-![Screenshot](SCREENSHOT.JPG)
+![Screenshot](https://github.com/nedankinde/wubzy/blob/main/SCREENSHOT.JPG)
